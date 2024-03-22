@@ -1,36 +1,57 @@
-import { Request, Response } from 'express';
-import { EmailTransport } from '../../providers/config.email';
+import { EmailTransport } from '../../providers/config.email'; // Importa a classe EmailTransport
 import { SendMailOptions, Transporter } from 'nodemailer';
+import { Request, Response } from 'express';
 
 export class EmailController {
+  // Instância da classe EmailTransport para configurar o transporte de e-mails
   private static readonly emailTransport: EmailTransport = new EmailTransport();
+  // Obtém o remetente do ambiente
   private static readonly sender: any = process.env.SMTP_USER;
 
+  /**
+   *
+   * @param {Request} req - Request object.
+   * @param {Response} res - Response object.
+   * @returns
+   */
   public static async send(req: Request, res: Response) {
-    const post = req.body;
+    const post = req.body; // Obtém os dados enviados na requisição
 
     try {
       let transport: Transporter<SendMailOptions>;
-      transport = this.emailTransport.transport;
+      // Obtém o transporte de e-mail da instância EmailTransport
+      transport = EmailController.emailTransport.transport;
+
+      // Verifica se o e-mail e o conteúdo foram fornecidos
       if (!post?.email) throw { message: 'E-mail não informado!', status: 400 };
       if (!post?.content)
         throw { message: 'Conteúdo do e-mail não informado!', status: 400 };
 
+      // Envia o e-mail
       const info = await transport.sendMail({
-        from: `Code Byte <${this.sender}>`,
-        to: post?.email,
-        subject: 'Bem-vindas!',
-        text: 'E-amil examplo de bem-vindas!',
-        html: this.createBody(post.body)
+        from: `Code Byte <${EmailController.sender}>`, // Remetente do E-mail
+        to: post?.email, // destinatário do E-mail
+        subject: 'Bem-vindas!', // Assunto do e-mail
+        text: 'E-email examplo de bem-vindas!', // Corpo do e-mail em texto plano
+        html: EmailController.createBody(post.content) // Corpo do e-mail em HTML
       });
 
-      return res.send(info).status(200);
+      // Retorna a resposta com as informações do e-mail enviado
+      return res.send({ message: info.envelope }).status(200);
     } catch (error) {
-      return res.send(error.message).status(error.status ?? 500);
+      // Em caso de erro, retorna uma mensagem de erro com o status correspondente
+      console.log(error);
+      return res.send({ message: error.message }).status(error.status ?? 500);
     }
   }
 
+  /**
+   *
+   * @param {string} body - Content that will be rendered in HTML.
+   * @returns
+   */
   private static createBody(body: string): string {
+    // Template HTML para o corpo do e-mail
     return `<head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -67,34 +88,33 @@ export class EmailController {
               color: #666;
               font-size: 16px;
               line-height: 1.5;
+              text-align: center;
           }
 
-          .btn {
-              display: inline-block;
-              background-color: #007bff;
-              color: #fff;
-              text-decoration: none;
-              padding: 10px 20px;
-              border-radius: 5px;
-              margin-top: 20px;
+          span {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.5;
+            text-align: center;
           }
 
-          .btn:hover {
-              background-color: #0056b3;
+          h2 {
+            margin-top: 20px;
           }
+
+          .custom {
+            text-align: center;
+          }
+
       </style>
       </head>
       <body>
       <div class="container">
           <h1>Bem-vindo(a)!</h1>
           <p>Olá, este E-mail é apenas um teste!</p>
-          <p>Seja bem-vindo(a) à nossa comunidade! Estamos felizes em tê-lo conosco.</p>
-          <p>Esperamos que você aproveite ao máximo a sua experiência.</p>
-          <p>Se tiver alguma dúvida ou precisar de assistência, não hesite em nos contatar.</p>
-          <a href="#" class="btn">Começar</a>
 
-          <h2>Conteudo Personalizado</h2>
-          <p>${body}</p>
+          <h2 class="custom">Conteudo Personalizado</h2>
+          <p class="custom">${body}</p>
       </div>
       </body>
     `;
