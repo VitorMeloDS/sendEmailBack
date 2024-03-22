@@ -3,6 +3,6 @@ import { Router } from 'express';
 
 const router: Router = Router();
 
-router.use('/send', EmailController.send);
+router.post('/send', EmailController.send);
 
 export const routerControl: Router = router;
