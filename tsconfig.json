@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "outDir": "./dist",
+    "module": "commonjs",
+    "target": "ES2020",
+    "esModuleInterop": true,
+    "allowJs": true,
+    "strictNullChecks": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@models": [
+        "./src/common/database/models"
+      ],
+      "@config": [
+        "./src/common/config"
+      ],
+      "@modules": [
+        "./src/core/modules"
+      ],
+      "@utils": [
+        "./src/common/utils"
+      ],
+      "@helpers": [
+        "./src/common/helpers"
+      ],
+      "@interfaces": [
+        "src/core/interfaces"
+      ]
+    }
+  }
+}
