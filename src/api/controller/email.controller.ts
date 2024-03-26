@@ -8,7 +8,9 @@ export class EmailController {
   // Obtém o remetente do ambiente
   private static readonly sender: any = process.env.SMTP_USER;
   // Regex para validar HTML
-  private static readonly pattern = /<[^>]+>/;
+  private static readonly patternHtml = /<[^>]+>/;
+  // Regex para validar Links
+  private static readonly patternLink = /(http(s)?:\/\/[^\s]+)/g;
 
   /**
    *
@@ -28,8 +30,10 @@ export class EmailController {
       if (!post?.email) throw { message: 'E-mail não informado!', status: 400 };
       if (!post?.content)
         throw { message: 'Conteúdo do e-mail não informado!', status: 400 };
-      if (EmailController.pattern.test(post?.content))
+      if (EmailController.patternHtml.test(post?.content))
         throw { message: 'O conteúdo do e-mail não pode ter HTML!', status: 400 };
+      if (EmailController.patternLink.test(post?.content))
+        throw { message: 'O conteúdo do e-mail não pode ter Link!', status: 400 };
 
       // Envia o e-mail
       const info = await transport.sendMail({
